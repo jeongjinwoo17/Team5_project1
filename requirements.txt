@@ -1,0 +1,10 @@
+kagglehub
+ultralytics
+torchmetrics
+albumentations
+opencv-python
+torch
+pandas
+numpy
+matplotlib
+tqdm
