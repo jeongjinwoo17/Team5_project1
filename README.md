@@ -25,18 +25,26 @@
 ## 📁 프로젝트 구조
 
 ```
-├── train.py                # 메인 실행 파일 (전체 파이프라인 호출)
+├── train.py                            # 메인 실행 파일 (전체 파이프라인 호출)
 ├── README.md
-├── submission.csv          # 실행 후 자동 생성
+├── requirements.txt
+├── submission.csv                      # 실행 후 자동 생성
+├── images/                             # 결과 이미지
+│   ├── evaluation_metric_graph.png     # Train Loss / Validation Metrics 그래프
+│   ├── test_data_confidence.png        # Prediction Confidence Distribution
+│   ├── test_image_1.png               # 테스트 이미지 결과 (1~5번)
+│   ├── test_image_2.png               # 테스트 이미지 결과 (6~10번)
+│   ├── test_image_3.png               # 테스트 이미지 결과 (11~15번)
+│   └── test_image_4.png               # 테스트 이미지 결과 (16~20번)
 └── src/
-    ├── config.py           # 경로 및 하이퍼파라미터 설정
-    ├── data_loader.py      # Step 1 - kagglehub 데이터 다운로드
-    ├── dataset.py          # Step 2 - 클래스 맵핑 + Train/Val 분리
-    ├── augmentation.py     # Step 3 - 오프라인 데이터 증강
-    ├── trainer.py          # Step 4·5 - data.yaml 생성 + YOLO 학습
-    ├── visualizer.py       # Step 6·7 - Loss·mAP 시각화 + 테스트 예측
-    ├── evaluator.py        # Train 자체 채점 (IoU 기반 TP/FP/FN)
-    └── submission.py       # Step 8 - 제출용 CSV 생성
+    ├── config.py                       # 경로 및 하이퍼파라미터 설정
+    ├── data_loader.py                  # Step 1 - kagglehub 데이터 다운로드
+    ├── dataset.py                      # Step 2 - 클래스 맵핑 + Train/Val 분리
+    ├── augmentation.py                 # Step 3 - 오프라인 데이터 증강
+    ├── trainer.py                      # Step 4·5 - data.yaml 생성 + YOLO 학습
+    ├── visualizer.py                   # Step 6·7 - Loss·mAP 시각화 + 테스트 예측
+    ├── evaluator.py                    # Train 자체 채점 (IoU 기반 TP/FP/FN)
+    └── submission.py                   # Step 8 - 제출용 CSV 생성
 ```
 
 ## 📦 데이터셋
