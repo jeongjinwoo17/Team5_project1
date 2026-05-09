@@ -1,8 +1,9 @@
-# 💊 알약 객체 탐지 프로젝트 (YOLOv12s)
+# 💊 경구 알약 탐지 프로그램
 
 여러 모델을 활용하여 알약 이미지 객체 탐지를 진행하고 
 가장 성능이 좋은 모델을 대표 모델로 선정하여 Github에 
 공개하였습니다.
+데이터는 kagglehub으로 자동 다운로드되며, 로컬 PC에서 바로 실행 가능합니다.
 
 ## 📌 프로젝트 소개
 
@@ -21,27 +22,21 @@
 | 조영한 | Faster R-CNN, ResNet18, EfficiiientNet-B0, EasyOCR |
 | 정진우 | RT-DETR |
 
-## 🛠 사용 기술
-
-- Python 3.10+
-- YOLOv12s (Ultralytics)
-- PyTorch
-- Albumentations
-- OpenCV
-- Pandas / NumPy / Matplotlib
-
-## 📁 폴더 구조
+## 📁 프로젝트 구조
 
 ```
-project1/
-├── src/
-│   └── train.py              # 전처리 + 증강 + 학습 + 평가 + CSV 생성
-├── data/
-│   └── (데이터셋 - 아래 링크 참고)
-├── runs/                     # 학습 결과 자동 생성 (git 미포함)
-├── requirements.txt          # 필요 라이브러리
-├── .gitignore
-└── README.md
+├── train.py                # 메인 실행 파일 (전체 파이프라인 호출)
+├── README.md
+├── submission.csv          # 실행 후 자동 생성
+└── src/
+    ├── config.py           # 경로 및 하이퍼파라미터 설정
+    ├── data_loader.py      # Step 1 - kagglehub 데이터 다운로드
+    ├── dataset.py          # Step 2 - 클래스 맵핑 + Train/Val 분리
+    ├── augmentation.py     # Step 3 - 오프라인 데이터 증강
+    ├── trainer.py          # Step 4·5 - data.yaml 생성 + YOLO 학습
+    ├── visualizer.py       # Step 6·7 - Loss·mAP 시각화 + 테스트 예측
+    ├── evaluator.py        # Train 자체 채점 (IoU 기반 TP/FP/FN)
+    └── submission.py       # Step 8 - 제출용 CSV 생성
 ```
 
 ## 📦 데이터셋
@@ -69,50 +64,46 @@ project1/
 | Windows | `C:\Users\본인이름\.kaggle\kaggle.json` |
 | Mac/Linux | `~/.kaggle/kaggle.json` |
 
-## ⚙️ 환경 설정
+## ⚙️ 설치
 
 ```bash
-# 1. 저장소 클론
-git clone https://github.com/jeongjinwoo17/Team5_project1.git
-cd Team5_project1
-
-# 2. 라이브러리 설치
-pip install -r requirements.txt
+pip install kagglehub ultralytics albumentations opencv-python torchmetrics tqdm pandas matplotlib
 ```
 
-## 🚀 실행 방법
+> kagglehub 사용을 위해 Kaggle API 키가 필요합니다.  
+> [kaggle.com → Settings → API → Create New Token](https://www.kaggle.com/settings) 에서 `kaggle.json` 다운로드 후  
+> Windows: `C:\Users\사용자이름\.kaggle\kaggle.json` 에 위치시키세요.
+
+## 🚀 실행
 
 ```bash
-# 학습 실행 (데이터 전처리 → 증강 → 학습 → 평가 → CSV 생성 순서로 자동 진행)
-python src/train.py
+python train.py
 ```
 
-## 📊 모델 학습 설정
+## 📋 파이프라인 순서
 
-| 파라미터 | 값 |
-|----------|-----|
-| 모델 | YOLOv12s |
-| Epochs | 200 |
-| Patience | 20 |
-| Image Size | 1280 |
-| Batch Size | 4 |
-| Train/Val 비율 | 80:20 |
-| Mosaic | 1.0 |
-| Mixup | 0.15 |
+| 파일 | Step | 내용 |
+|------|------|------|
+| `data_loader.py`  | 1 | kagglehub 데이터 자동 다운로드 |
+| `dataset.py`      | 2 | 클래스 맵핑 생성 + Train/Val 분리 (80:20) |
+| `augmentation.py` | 3 | 오프라인 데이터 증강 |
+| `trainer.py`      | 4·5 | data.yaml 생성 + YOLO12s 학습 |
+| `visualizer.py`   | 6·7 | Loss·mAP 시각화 + 테스트 예측 |
+| `evaluator.py`    | 검증 | Train 채점 (IoU 기반 TP/FP/FN) |
+| `submission.py`   | 8 | 제출용 submission.csv 생성 |
 
-## 🔍 데이터 증강 종류
+## ⚡ 주요 하이퍼파라미터
 
-- Horizontal Flip
-- Vertical Flip + Rotate
-- Gaussian Noise
-- Brightness/Contrast
-- Color Jitter (HSV)
-- Blur/Sharpen
-- Geometric (ShiftScaleRotate + Perspective)
+`src/config.py` 에서 수정하면 전체 파이프라인에 반영됩니다.
 
-> 소수 클래스(15장 미만)는 8배 추가 증강 적용
-
-## 📝 출력 결과
-
-- `runs/detect/train/weights/best.pt` — 최고 성능 모델 가중치
-- `submission.csv` — 제출용 예측 결과 파일
+| 항목 | 기본값 |
+|------|--------|
+| 모델 | YOLO12s |
+| epochs | 200 |
+| patience | 20 |
+| imgsz | 1280 |
+| batch | 4 |
+| mosaic / mixup | 1.0 / 0.15 |
+| degrees | 40.0 |
+| 소수 클래스 기준 | 6장 이하 → 8배 증강 |
+| 일반 클래스 | 5배 증강 |
